@@ -379,6 +379,9 @@ def betterEvaluationFunction(currentGameState):
         if smallestGhostDistance < 2:
             ghostScore = -9999999
 
+    # capsules
+    
+
     return currentGameState.getScore() + averageDistance + ghostScore
 
 
