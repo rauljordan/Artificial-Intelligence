@@ -294,8 +294,63 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           All ghosts should be modeled as choosing uniformly at random from their
           legal moves.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # For the Ghosts
+        def mini(state, ghost, depth):
+            """
+            :param state - a given state of the game
+            :param ghost - the agent index of the ghost maxi is being calculated
+                            for
+            :param depth - the current depth calculated
+            :return list - a list with two elements, the utility of that state,
+                            and the action taken to get there
+            """
+            # moves for ghost
+            legalMoves = state.getLegalActions(ghost)
+
+            if state.isLose() or not legalMoves or self.depth < depth:
+                return [self.evaluationFunction(state), None]
+
+            # if there are still ghosts to calculate
+            utilities = []
+            total_ghosts = state.getNumAgents() - 1
+            for action in legalMoves:
+                if ghost != total_ghosts:
+                    suc = state.generateSuccessor(ghost, action)
+                    utilities.append(mini(suc, ghost + 1, depth))
+                else:
+                    suc = state.generateSuccessor(ghost, action)
+                    utilities.append(maxi(suc, depth + 1))
+
+            sum_of_expectations = 0
+            for item in utilities:
+                utility = item[0]
+                sum_of_expectations += float(utility) / len(utilities)
+            return sum_of_expectations, None
+
+        # Pacman
+        def maxi(state, depth):
+            """
+            :param state - a given state of the game
+            :param depth - the current depth calculated
+            :return list - a list with two elements, the utility of that state,
+                            and the action taken to get there
+            """
+            # moves for pacman
+            legalMoves = state.getLegalActions(0)
+            if  state.isWin() or not legalMoves or self.depth < depth:
+                return [self.evaluationFunction(state), None]
+
+            utilities = []
+            # get successors of actions
+            for action in legalMoves:
+                suc = state.generateSuccessor(0, action)
+                utilities.append( (mini(suc, 1, depth)[0], action) )
+
+            return max(utilities)
+
+        m = maxi(gameState, 1)
+        utility, action = m[0], m[1]
+        return action
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -304,7 +359,6 @@ def betterEvaluationFunction(currentGameState):
 
       DESCRIPTION: <write something here so we know what you did>
     """
-    "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
 # Abbreviation
