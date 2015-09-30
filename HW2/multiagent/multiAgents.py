@@ -156,19 +156,19 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
             # if there are still ghosts to calculate
             total_ghosts = gameState.getNumAgents() - 1
-            if ghostID != total_ghosts:
+            if ghost != total_ghosts:
                 utilities = []
                 # get successors of actions
                 for action in legalMoves:
-                    suc = state.generateSuccessor(ghostID, action)
-                    utilities.append( (mini(suc, ghostID + 1, currentDepth), action) )
+                    suc = state.generateSuccessor(ghost, action)
+                    utilities.append( (mini(suc, ghost + 1, depth), action) )
             # else if we are on the last ghost
             else:
                 utilities = []
                 # get successors of actions
                 for action in legalMoves:
-                    suc = state.generateSuccessor(ghostID, action)
-                    utilities.append( (maxi(suc, currentDepth + 1), action) )
+                    suc = state.generateSuccessor(ghost, action)
+                    utilities.append( (maxi(suc, depth + 1), action) )
 
 
             return min(utilities)
@@ -190,7 +190,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             # get successors of actions
             for action in legalMoves:
                 suc = state.generateSuccessor(0, action)
-                utilities.append( (mini(suc, 1, currentDepth), action) )
+                utilities.append( (mini(suc, 1, depth), action) )
 
             return max(utilities)
 
@@ -208,51 +208,79 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
 
-        def mini(state, ghostID, currentDepth, alpha, beta):
-
+        # For the Ghosts
+        def mini(state, ghost, depth, a, b):
+            """
+            :param state - a given state of the game
+            :param ghost - the agent index of the ghost maxi is being calculated
+                            for
+            :param depth - the current depth calculated
+            :return list - a list with two elements, the utility of that state,
+                            and the action taken to get there
+            """
             # moves for ghost
-            legalMoves = state.getLegalActions(ghostID)
+            legalMoves = state.getLegalActions(ghost)
 
-            if not legalMoves or self.depth < currentDepth or state.isLose():
+            if state.isLose() or not legalMoves or self.depth < depth:
                 return [self.evaluationFunction(state), None]
 
-            # if all ghosts have been calculated
-            if ghostID == (total_agents - 1):
-                utilities = []
-                # get successors of actions
-                for action in legalMoves:
-                    suc = state.generateSuccessor(ghostID, action)
-                    utilities.append( (maxi(suc, currentDepth + 1), action) )
-            else:
-                utilities = []
-                # get successors of actions
-                for action in legalMoves:
-                    suc = state.generateSuccessor(ghostID, action)
-                    utilities.append( (mini(suc, ghostID + 1, currentDepth), action) )
+            v = float('inf')
+            chosenAction = None
+            total_ghosts = state.getNumAgents() - 1
+            for action in legalMoves:
 
-            return min(utilities)
+                if ghost != total_ghosts:
+                    suc = state.generateSuccessor(ghost, action)
+                    utility = mini(suc, ghost + 1, depth, a, b)
+
+                else:
+                    suc = state.generateSuccessor(ghost, action)
+                    utility = maxi(suc, depth + 1, a, b)
+
+                if utility[0] < v:
+                    v = utility[0]
+                    chosenAction = action
+                if v < a:
+                    return [v, chosenAction]
+
+                b = min(b, v)
+            return [v, chosenAction]
+
 
         # Pacman
-        def maxi(state, currentDepth, alpha, beta):
+        def maxi(state, depth, a, b):
+            """
+            :param state - a given state of the game
+            :param depth - the current depth calculated
+            :return list - a list with two elements, the utility of that state,
+                            and the action taken to get there
+            """
             # moves for pacman
             legalMoves = state.getLegalActions(0)
-            if not legalMoves or self.depth < currentDepth or state.isWin():
+            if  state.isWin() or not legalMoves or self.depth < depth:
                 return [self.evaluationFunction(state), None]
 
             v = float('-inf')
+            chosenAction = None
             # get successors of actions
             for action in legalMoves:
-                if utility > v:
-                    v = utility
-                if v > beta:
-                    return v
-                newAlpha = max(alpha, v)
                 suc = state.generateSuccessor(0, action)
-                utility = (mini(suc, 1, currentDepth, newAlpha, beta), action)
+                utility =  mini(suc, 1, depth, a, b)
+                if utility[0] > v:
+                    v = utility[0]
+                    chosenAction = action
+                if v > b:
+                    return [v, chosenAction]
+                a = max(a, v)
 
-            return v
 
-        return maxi(gameState, 1)[1]
+            return [v, chosenAction]
+
+        a = float('-inf')
+        b = float('inf')
+        m = maxi(gameState, 1, a, b)
+        utility, action = m[0], m[1]
+        return action
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
