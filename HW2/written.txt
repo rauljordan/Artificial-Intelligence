@@ -1,3 +1,5 @@
+1) It fared much better with the random ghost than directional ghost because it
+
 2) If I were to design a ghost agent, I'd design one that really takes into the account the movements of the other ghosts around it so that it could eventually corner pacman and he would have a hard time getting out of the situation. A lot of players find the random ghosts easy because they are all autonomous in a way and do not really try to find ways to corner or trap pacman with the other ghosts so they become quite easy to avoid.
 
-3)
+3) 1. For any values that are larger than or equal to 6. 2. Yes it did because the next step will be maximization.
