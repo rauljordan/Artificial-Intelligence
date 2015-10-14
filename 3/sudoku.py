@@ -71,8 +71,11 @@ class Sudoku:
         Creates a new version of the board with a variable
         set to `val`.
         """
+
         newBoard = deepcopy(self.board)
+        print newBoard[row][col]
         newBoard[row][col] = val
+        print newBoard[row][col]
         return Sudoku(newBoard, [(row, col)])
 
     def firstEpsilonVariable(self):
@@ -119,14 +122,24 @@ class Sudoku:
         `factor_type` is one of BOX, ROW, COL
         `i` is an index between 0 and 8.
         """
-        raise NotImplementedError()
-        # values = []
-        # if factor_type == BOX:
-
-        # if factor_type == ROW:
-
-        # if factor_type == COL:
-
+        if factor_type == ROW:
+            row = self.row(i)
+            conflicts = crossOff(row, range(1,10))
+            values = [x if x not in row else None for x in range(1, 10)]
+            self.factorRemaining[factor_type, i] = values
+            self.factorNumConflicts[factor_type, i] = conflicts
+        if factor_type == COL:
+            col = self.col(i)
+            conflicts = crossOff(col, range(1,10))
+            values = [x if x not in col else None for x in range(1, 10)]
+            self.factorRemaining[(factor_type, i)] = values
+            self.factorNumConflicts[factor_type, i] = conflicts
+        if factor_type == BOX:
+            box = self.box(i)
+            conflicts = crossOff(box, range(1,10))
+            values = [x if x not in box else None for x in range(1, 10)]
+            self.factorRemaining[(factor_type, i)] = values
+            self.factorNumConflicts[factor_type, i] = conflicts
 
     def updateAllFactors(self):
         """
@@ -134,14 +147,19 @@ class Sudoku:
         Update the values remaining for all factors.
         There is one factor for each row, column, and box.
         """
-        raise NotImplementedError()
+        for i in range(9):
+            self.updateFactor(BOX, i)
+            self.updateFactor(COL, i)
+            self.updateFactor(ROW, i)
 
     def updateVariableFactors(self, variable):
         """
         IMPLEMENT FOR PART 2
         Update all the factors impacting a variable (neighbors in factor graph).
         """
-        raise NotImplementedError()
+        self.updateFactor(ROW, variable[0])
+        self.updateFactor(COL, variable[1])
+        self.updateFactor(BOX, self.box_id(variable[0], variable[1]))
 
     # CSP SEARCH CODE
     def nextVariable(self):
@@ -160,7 +178,15 @@ class Sudoku:
         Returns new assignments with each possible value
         assigned to the variable returned by `nextVariable`.
         """
-        raise NotImplementedError()
+        row_id, col_id = self.nextVariable()
+        successors = []
+        for i in range(9):
+            # needs to check if variable can be assigned. each iteration needs to
+            # update the variable factors
+            
+            successors.append(self.setVariable(row_id, col_id, 2))
+
+        return successors
 
     def getAllSuccessors(self):
         if not args.forward:
