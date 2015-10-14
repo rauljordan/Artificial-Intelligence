@@ -73,9 +73,7 @@ class Sudoku:
         """
 
         newBoard = deepcopy(self.board)
-        print newBoard[row][col]
         newBoard[row][col] = val
-        print newBoard[row][col]
         return Sudoku(newBoard, [(row, col)])
 
     def firstEpsilonVariable(self):
@@ -124,21 +122,21 @@ class Sudoku:
         """
         if factor_type == ROW:
             row = self.row(i)
-            conflicts = crossOff(row, range(1,10))
+            conflicts = crossOff(deepcopy(row), range(1,10))
             values = [x if x not in row else None for x in range(1, 10)]
             self.factorRemaining[factor_type, i] = values
             self.factorNumConflicts[factor_type, i] = conflicts
         if factor_type == COL:
             col = self.col(i)
-            conflicts = crossOff(col, range(1,10))
+            conflicts = crossOff(deepcopy(col), range(1,10))
             values = [x if x not in col else None for x in range(1, 10)]
-            self.factorRemaining[(factor_type, i)] = values
+            self.factorRemaining[factor_type, i] = values
             self.factorNumConflicts[factor_type, i] = conflicts
         if factor_type == BOX:
             box = self.box(i)
-            conflicts = crossOff(box, range(1,10))
+            conflicts = crossOff(deepcopy(box), range(1,10))
             values = [x if x not in box else None for x in range(1, 10)]
-            self.factorRemaining[(factor_type, i)] = values
+            self.factorRemaining[factor_type, i] = values
             self.factorNumConflicts[factor_type, i] = conflicts
 
     def updateAllFactors(self):
@@ -157,6 +155,7 @@ class Sudoku:
         IMPLEMENT FOR PART 2
         Update all the factors impacting a variable (neighbors in factor graph).
         """
+
         self.updateFactor(ROW, variable[0])
         self.updateFactor(COL, variable[1])
         self.updateFactor(BOX, self.box_id(variable[0], variable[1]))
@@ -178,13 +177,22 @@ class Sudoku:
         Returns new assignments with each possible value
         assigned to the variable returned by `nextVariable`.
         """
+
         row_id, col_id = self.nextVariable()
+        self.updateVariableFactors((row_id, col_id))
         successors = []
-        for i in range(9):
-            # needs to check if variable can be assigned. each iteration needs to
-            # update the variable factors
-            
-            successors.append(self.setVariable(row_id, col_id, 2))
+        row_remaining = self.factorRemaining[ROW, row_id]
+        col_remaining = self.factorRemaining[COL, col_id]
+        box_remaining = self.factorRemaining[BOX, self.box_id(row_id, col_id)]
+
+        labels_available = [x for x in range(1,10) if x in row_remaining and
+                            x in col_remaining and
+                            x in box_remaining]
+
+        for label in labels_available:
+
+            # set and append to successors
+            successors.append(self.setVariable(row_id, col_id, label))
 
         return successors
 
