@@ -291,8 +291,19 @@ class Sudoku:
         Returns two random variables that can be swapped without
         causing a row factor conflict.
         """
-        raise NotImplementedError()
-
+        row_selector = range(9)
+        random.shuffle(row_selector)
+        while len(row_selector):
+            rand_row_index = row_selector.pop()
+            rw = self.board[rand_row_index]
+            rand = range(9)
+            random.shuffle(rand)
+            for i in rand:
+                for j in rand:
+                    if not i == j:
+                        if not rw[i] == rw[j]:
+                            return (rand_row_index, i), (rand_row_index, j)
+        raise ValueError("Board cannot make any swaps. it is literally just a board full of " + str(self.board[0][0]) + "'s.")
 
     # PART 8
     def gradientDescent(self, variable1, variable2):
