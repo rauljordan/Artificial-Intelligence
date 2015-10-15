@@ -211,7 +211,11 @@ class Sudoku:
         IMPLEMENT IN PART 4
         Returns true if all variables have non-empty domains.
         """
-        raise NotImplementedError()
+        for i in range(len(self.board)):
+            for j in range(len(self.board[i])):
+                if len(self.variableDomain(i,j)) == 0:
+                    return False
+        return True
 
     # PART 5
     def mostConstrainedVariable(self):
