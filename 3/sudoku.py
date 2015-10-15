@@ -223,7 +223,16 @@ class Sudoku:
         IMPLEMENT IN PART 5
         Returns the most constrained unassigned variable.
         """
-        raise NotImplementedError()
+        minimum = 10
+        most_constrained = None
+        for i in range(len(self.board)):
+            for j in range(len(self.board[i])):
+                if self.board[i][j] == 0:
+                    m = self.variableDomain(i,j)
+                    if len(m) < minimum:
+                        minimum = len(m)
+                        most_constrained = (i, j)
+        return most_constrained
 
     # LOCAL SEARCH CODE
     # Fixed variables cannot be changed by the player.
