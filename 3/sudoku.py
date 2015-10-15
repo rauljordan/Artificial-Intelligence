@@ -276,8 +276,13 @@ class Sudoku:
         with all the row factors being held consistent.
         Should call `updateAllFactors` at end.
         """
-        raise NotImplementedError()
-        # self.updateAllFactors()
+        total = []
+        for i in range(9):
+            b = range(1, 10)
+            random.shuffle(b)
+            total.append(b)
+        self.updateAllFactors()
+        return Sudoku(total)
 
     # PART 7
     def randomSwap(self):
