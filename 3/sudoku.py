@@ -213,7 +213,7 @@ class Sudoku:
         """
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):
-                if len(self.variableDomain(i,j)) == 0:
+                if self.board[i][j] == 0 and len(self.variableDomain(i,j)) == 0:
                     return False
         return True
 
