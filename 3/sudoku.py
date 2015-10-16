@@ -122,19 +122,22 @@ class Sudoku:
         """
         if factor_type == ROW:
             row = self.row(i)
-            conflicts = crossOff(deepcopy(row), range(1,10))
+            conflicts = crossOff(range(1, 10), deepcopy(row))
+            #print conflicts
             values = [x if x not in row else None for x in range(1, 10)]
             self.factorRemaining[factor_type, i] = values
             self.factorNumConflicts[factor_type, i] = conflicts
         if factor_type == COL:
             col = self.col(i)
-            conflicts = crossOff(deepcopy(col), range(1,10))
+            conflicts = crossOff(range(1, 10), deepcopy(col))
+            #print conflicts
             values = [x if x not in col else None for x in range(1, 10)]
             self.factorRemaining[factor_type, i] = values
             self.factorNumConflicts[factor_type, i] = conflicts
         if factor_type == BOX:
             box = self.box(i)
-            conflicts = crossOff(deepcopy(box), range(1,10))
+            conflicts = crossOff(range(1, 10), deepcopy(box))
+            #print conflicts
             values = [x if x not in box else None for x in range(1, 10)]
             self.factorRemaining[factor_type, i] = values
             self.factorNumConflicts[factor_type, i] = conflicts
@@ -276,13 +279,23 @@ class Sudoku:
         with all the row factors being held consistent.
         Should call `updateAllFactors` at end.
         """
-        total = []
+
         for i in range(9):
-            b = range(1, 10)
-            random.shuffle(b)
-            total.append(b)
+            for j in range(9):
+                if self.board[i][j] == 0:
+                    # pick a number from 1 to 9 that isnt in the row
+                    # and set it
+                    num_not_in_row = [x for x in range(1,10) if x not in self.board[i]].pop()
+
+                    #print num_not_in_row
+                    self.board[i][j] = num_not_in_row
+
+        #total = []
+        #for i in range(9):
+        #    b = range(1, 10)
+        #    random.shuffle(b)
+        #    total.append(b)
         self.updateAllFactors()
-        return Sudoku(total)
 
     # PART 7
     def randomSwap(self):
@@ -300,9 +313,9 @@ class Sudoku:
             random.shuffle(rand)
             for i in rand:
                 for j in rand:
-                    if not i == j:
-                        if not rw[i] == rw[j]:
-                            return (rand_row_index, i), (rand_row_index, j)
+                    if not i == j and not rw[i] == rw[j] and (rand_row_index, i) not in self.fixedVariables.keys() and (rand_row_index, j) not in self.fixedVariables.keys():
+                        return (rand_row_index, i), (rand_row_index, j)
+
         raise ValueError("Board cannot make any swaps. it is literally just a board full of " + str(self.board[0][0]) + "'s.")
 
     # PART 8
@@ -311,8 +324,16 @@ class Sudoku:
         IMPLEMENT FOR PART 8
         Decide if we should swap the values of variable1 and variable2.
         """
-        raise NotImplementedError()
-
+        old_conflicts = self.numConflicts()
+        print("Violated Constraints: {}".format(old_conflicts))
+        board = deepcopy(self.board)
+        self.modifySwap(variable1, variable2)
+        # With probability 1/1000, dont bother switching back!
+        if random.random() * 1000 < 1:
+            return
+        new_conflicts = self.numConflicts()
+        if new_conflicts > old_conflicts:
+            self.modifySwap(variable2, variable1)
 
     ### IGNORE - PRINTING CODE
 
@@ -500,10 +521,18 @@ def solveCSP(problem):
 
 def solveLocal(problem):
     for r in range(1):
+        print problem.board
+        print problem.factorNumConflicts
+        print problem.numConflicts()
         problem.randomRestart()
+        print problem.board
+        print problem.factorNumConflicts
+        print problem.numConflicts()
         state = problem
         for i in range(100000):
             originalConflicts = state.numConflicts()
+            #print originalConflicts
+            #print state.board
 
             v1, v2 = state.randomSwap()
 
