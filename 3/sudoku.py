@@ -123,21 +123,18 @@ class Sudoku:
         if factor_type == ROW:
             row = self.row(i)
             conflicts = crossOff(range(1, 10), deepcopy(row))
-            #print conflicts
             values = [x if x not in row else None for x in range(1, 10)]
             self.factorRemaining[factor_type, i] = values
             self.factorNumConflicts[factor_type, i] = conflicts
         if factor_type == COL:
             col = self.col(i)
             conflicts = crossOff(range(1, 10), deepcopy(col))
-            #print conflicts
             values = [x if x not in col else None for x in range(1, 10)]
             self.factorRemaining[factor_type, i] = values
             self.factorNumConflicts[factor_type, i] = conflicts
         if factor_type == BOX:
             box = self.box(i)
             conflicts = crossOff(range(1, 10), deepcopy(box))
-            #print conflicts
             values = [x if x not in box else None for x in range(1, 10)]
             self.factorRemaining[factor_type, i] = values
             self.factorNumConflicts[factor_type, i] = conflicts
@@ -286,15 +283,7 @@ class Sudoku:
                     # pick a number from 1 to 9 that isnt in the row
                     # and set it
                     num_not_in_row = [x for x in range(1,10) if x not in self.board[i]].pop()
-
-                    #print num_not_in_row
                     self.board[i][j] = num_not_in_row
-
-        #total = []
-        #for i in range(9):
-        #    b = range(1, 10)
-        #    random.shuffle(b)
-        #    total.append(b)
         self.updateAllFactors()
 
     # PART 7
@@ -521,18 +510,10 @@ def solveCSP(problem):
 
 def solveLocal(problem):
     for r in range(1):
-        print problem.board
-        print problem.factorNumConflicts
-        print problem.numConflicts()
         problem.randomRestart()
-        print problem.board
-        print problem.factorNumConflicts
-        print problem.numConflicts()
         state = problem
         for i in range(100000):
             originalConflicts = state.numConflicts()
-            #print originalConflicts
-            #print state.board
 
             v1, v2 = state.randomSwap()
 
