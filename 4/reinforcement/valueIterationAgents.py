@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -43,9 +43,22 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.iterations = iterations
         self.values = util.Counter() # A Counter is a dict with default 0
 
-        # Write value iteration code here
-        "*** YOUR CODE HERE ***"
+        self.actions = dict(zip(mdp.getStates(), [0] * len(mdp.getStates())))
 
+        # Write value iteration code here
+        for i in range(self.iterations):
+            temp_values = util.Counter()
+            states = self.mdp.getStates()
+            for state in states:
+                max_val = float('-inf')
+                for action in mdp.getPossibleActions(state):
+                    total_val = self.computeQValueFromValues(state, action)
+                    if total_val > max_val:
+                        max_val = total_val
+                        temp_values[state] = max_val
+                        self.actions[state] = action
+
+            self.values = temp_values
 
     def getValue(self, state):
         """
@@ -60,7 +73,12 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        transition_probs = self.mdp.getTransitionStatesAndProbs(state, action)
+        total_val = 0
+        for s_prime, prob in transition_probs:
+            reward_s_prime = self.mdp.getReward(state, action, s_prime)
+            total_val += prob * (reward_s_prime + self.discount * self.values[s_prime])
+        return total_val
 
     def computeActionFromValues(self, state):
         """
@@ -72,7 +90,7 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.actions[state]
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
