@@ -318,7 +318,7 @@ class Sudoku:
         board = deepcopy(self.board)
         self.modifySwap(variable1, variable2)
         # With probability 1/1000, dont bother switching back!
-        if random.random() * 1000 < 1:
+        if random.random() < 1.0 / 1000.0:
             return
         new_conflicts = self.numConflicts()
         if new_conflicts > old_conflicts:
