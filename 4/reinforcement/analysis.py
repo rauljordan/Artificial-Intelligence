@@ -62,6 +62,7 @@ def question3e():
 def question6():
     answerEpsilon = None
     answerLearningRate = None
+    # This is not possible to achieve
     return 'NOT POSSIBLE'
 
 if __name__ == '__main__':

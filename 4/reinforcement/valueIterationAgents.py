@@ -1,17 +1,9 @@
-# valueIterationAgents.py
-# -----------------------
-# Licensing Information:  You are free to use or extend these projects for
-# educational purposes provided that (1) you do not distribute or publish
-# solutions, (2) you retain this notice, and (3) you provide clear
-# attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-#
-# Attribution Information: The Pacman AI projects were developed at UC Berkeley.
-# The core projects and autograders were primarily created by John DeNero
-# (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
-# Student side autograding was added by Brad Miller, Nick Hay, and
-# Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
-
+"""
+COMPSCI 182
+Sameer Mehra and Raul Jordan
+HW4
+"""
 import mdp, util
 
 from learningAgents import ValueEstimationAgent
@@ -43,22 +35,28 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.iterations = iterations
         self.values = util.Counter() # A Counter is a dict with default 0
 
-        self.actions = dict(zip(mdp.getStates(), [0] * len(mdp.getStates())))
+
+        self.actions = {}
+        # Creates a dictionary of actions that correspond to a given state,
+        # Which will be useful later on
+        for s in mdp.getStates():
+            self.actions[s] = [None] * len(mdp.getStates())
 
         # Write value iteration code here
-        for i in range(self.iterations):
-            temp_values = util.Counter()
-            states = self.mdp.getStates()
-            for state in states:
-                max_val = float('-inf')
-                for action in mdp.getPossibleActions(state):
-                    total_val = self.computeQValueFromValues(state, action)
-                    if total_val > max_val:
-                        max_val = total_val
-                        temp_values[state] = max_val
-                        self.actions[state] = action
+        for n in range(self.iterations):
+            tmp = util.Counter()
+            for state in self.mdp.getStates():
+                maxq = float('-inf')
 
-            self.values = temp_values
+                for action in mdp.getPossibleActions(state):
+                    q = self.computeQValueFromValues(state, action)
+
+                    # If the q is bigger than the max q we calculated
+                    if q > maxq:
+                        maxq = q
+                        tmp[state] = maxq
+                        self.actions[state] = action
+            self.values = tmp
 
     def getValue(self, state):
         """
@@ -72,13 +70,16 @@ class ValueIterationAgent(ValueEstimationAgent):
           Compute the Q-value of action in state from the
           value function stored in self.values.
         """
-        "*** YOUR CODE HERE ***"
-        transition_probs = self.mdp.getTransitionStatesAndProbs(state, action)
-        total_val = 0
-        for s_prime, prob in transition_probs:
-            reward_s_prime = self.mdp.getReward(state, action, s_prime)
-            total_val += prob * (reward_s_prime + self.discount * self.values[s_prime])
-        return total_val
+        # Initializes qtotal as a counter from 0
+        qtotal = 0
+        probabilities = self.mdp.getTransitionStatesAndProbs(state, action)
+
+        for s_prime, probability in probabilities:
+            s_prime_reward = self.mdp.getReward(state, action, s_prime)
+
+            # We simply add to the qtotal counter
+            qtotal += probability * (s_prime_reward + self.discount * self.values[s_prime])
+        return qtotal
 
     def computeActionFromValues(self, state):
         """
@@ -89,7 +90,7 @@ class ValueIterationAgent(ValueEstimationAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return None.
         """
-        "*** YOUR CODE HERE ***"
+        # Simply returns the action at that state in the dictionary we created
         return self.actions[state]
 
     def getPolicy(self, state):

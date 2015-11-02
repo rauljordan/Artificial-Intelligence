@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -41,8 +41,7 @@ class QLearningAgent(ReinforcementAgent):
     def __init__(self, **args):
         "You can initialize Q-values here..."
         ReinforcementAgent.__init__(self, **args)
-
-        "*** YOUR CODE HERE ***"
+        self.qvals = util.Counter()
 
     def getQValue(self, state, action):
         """
@@ -51,7 +50,9 @@ class QLearningAgent(ReinforcementAgent):
           or the Q node value otherwise
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        key = (state, action)
+        q = self.qvals[key]
+        return q
 
 
     def computeValueFromQValues(self, state):
@@ -61,8 +62,20 @@ class QLearningAgent(ReinforcementAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return a value of 0.0.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        actions = self.getLegalActions(state)
+        if actions:
+            # We initialize the max action value to be negative inf first
+            maxact = float('-inf')
+            for action in actions:
+                key = (state, action)
+                qval = self.qvals[key]
+
+                # Now we update the max action value by taking a new maximum
+                maxact = max(maxact, qval)
+            return maxact
+
+        else:
+            return 0
 
     def computeActionFromQValues(self, state):
         """
@@ -70,8 +83,21 @@ class QLearningAgent(ReinforcementAgent):
           are no legal actions, which is the case at the terminal state,
           you should return None.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        legalActions = self.getLegalActions(state)
+        action = None
+
+        # We do the same and initialize a max action
+        maxact = float('-inf')
+        for a in legalActions:
+
+            # We simply update accordingly
+            key = (state, a)
+            qval = self.qvals[key]
+            if maxact < qval:
+                maxact = qval
+                action = a
+
+        return action
 
     def getAction(self, state):
         """
@@ -84,13 +110,16 @@ class QLearningAgent(ReinforcementAgent):
           HINT: You might want to use util.flipCoin(prob)
           HINT: To pick randomly from a list, use random.choice(list)
         """
-        # Pick Action
         legalActions = self.getLegalActions(state)
-        action = None
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        randomness = util.flipCoin(self.epsilon)
 
-        return action
+        # We simply follow the pseudocode and obtain a random choice from the
+        # list
+        if randomness:
+            return random.choice(legalActions)
+        else:
+            return self.getPolicy(state)
+
 
     def update(self, state, action, nextState, reward):
         """
@@ -101,8 +130,21 @@ class QLearningAgent(ReinforcementAgent):
           NOTE: You should never call this function,
           it will be called on your behalf
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        lastq = self.getQValue(state, action)
+        # we need to obtain our current q which will depend on this alpha
+        currentq = (1 - self.alpha) * lastq
+
+        # Obtains the next q
+        nextq = self.alpha * (reward + self.discount * self.getValue(nextState))
+
+        # if there are legal actions we have to simply obtain as follows
+        if self.getLegalActions(state):
+            key = (state, action)
+            self.qvals[key] = currentq + nextq
+        else:
+            key = (state, action)
+            # Otherwise sets it to be current q plus alpha times reward
+            self.qvals[key] = currentq + (self.alpha * reward)
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
