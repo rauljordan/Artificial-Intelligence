@@ -1,3 +1,8 @@
+"""
+COMPSCI 182
+Raul Jordan and Sameer Mehra
+HW4
+"""
 # analysis.py
 # -----------
 # Licensing Information:  You are free to use or extend these projects for

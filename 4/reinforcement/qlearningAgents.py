@@ -1,3 +1,8 @@
+"""
+COMPSCI 182
+Raul Jordan and Sameer Mehra
+"""
+
 # qlearningAgents.py
 # ------------------
 # Licensing Information:  You are free to use or extend these projects for
