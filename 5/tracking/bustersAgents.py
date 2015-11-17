@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -162,5 +162,35 @@ class GreedyBustersAgent(BustersAgent):
         livingGhostPositionDistributions = \
             [beliefs for i, beliefs in enumerate(self.ghostBeliefs)
              if livingGhosts[i+1]]
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+
+        # it keeps track of the current ghost and a list of positions and a
+        # min distance
+        minDistance = float("inf")
+        ghostPositions = []
+        ghostIndex = 0
+
+        # iterates over each ghost
+        for ghost in livingGhostPositionDistributions:
+            prob = 0
+            for pos, belief in ghost.items():
+                if prob < belief:
+
+                    # updates probability based on beilef
+                    prob = belief
+                    ghostPositions.insert(ghostIndex, pos)
+            ghostIndex += 1
+        # for every position in the ghost position we update the min distance
+        # and min position using distancer
+        for position in ghostPositions:
+            if minDistance > self.distancer.getDistance(pacmanPosition, position):
+                minDistance = self.distancer.getDistance(pacmanPosition, position)
+                minPosition = position
+
+        for action in legal:
+            # now we obtain the next position from the successors
+            nextPosition = Actions.getSuccessor(pacmanPosition, action)
+
+            # finally we compare with the min distance to return the action
+            if self.distancer.getDistance(nextPosition, minPosition) < minDistance:
+                return action
